@@ -1,0 +1,1926 @@
+title,heading,content,tokens
+harvest,Module geodata_harvester.harvest,"This script is running the headless version of the data harvester.
+The following main steps are automatically executed within the run() function:
+    - loading settings from config file
+    - creating bounding box from input file points if not provided
+    - downloading data layers as sepcified in config file
+    - extract data for point locations provided in input file (name specified in settings)
+    - save results to disk as csv and geopackage",92
+harvest,Functions,"run(path_to_config, log_name='download_log', preview=False, return_df=False)
+:   A headless version of the Data-Harvester (with some limitations).
+    Results are saved to disk.
+Parameters
+----------
+path_to_config : str
+    Path to YAML config file
+log_name: name of log file (default: ""download_log"")
+preview : bool, optional
+    Plots a matrix of downloaded images if set to True, by default False
+return_df : bool, optional (Default: False)
+    if True, returns dataframe with results
+
+Returns
+-------
+None (if return_df is False)
+dataframe (if return_df is True)
+",137
+getdata_slga,Module geodata_harvester.getdata_slga,"Python script to download data from Soil and Landscape Grid of Australia (SLGA).
+Core functionality:
+- Retrieval of WCS capability  with function get_capabilities()
+- automatic download SLGA data for given depth range and layer(s) via Web Coverage Service (WCS)
+- clip data to custom bounding box
+- save data as multi-band geotiff
+- plot data as map
+The SLGA layers and metadata are described as dictionary in the module function get_slgadict()
+and the respective licensing and attribution are availabe with the module function getdict_license()
+More details about the SLGA data and attributions can be found here:
+https://www.clw.csiro.au/aclep/soilandlandscapegrid/ProductDetails-SoilAttributes.html
+This package is part of the Data Harvester project developed for the Agricultural Research Federation (AgReFed).
+Copyright 2022 Sydney Informatics Hub (SIH), The University of Sydney
+This open-source software is released under the LGPL-3.0 License.
+Author: Sebastian Haan",216
+getdata_slga,Functions,"depth2identifier(depth_min, depth_max)
+:   Get identifiers that correspond to depths and their corresponding confidence interval identifiers
+    that lie within the depth range depth_min to depth_max.
+Parameters
+----------
+depth_min : minimum depth [cm]
+depth_max : maximum depth [cm]
+
+Returns
+-------
+identifiers : layer identifiers
+identifiers_ci_5pc : identifiers for confidence interval 5%
+identifiers_ci_95pc : identifiers for confidence interval 95%
+depth_lower : lower depth of interval
+depth_upper : upper depth of interval
+
+get_capabilities(url)
+:   Get capabilities from WCS layer
+Parameters
+----------
+url : str
+    layer url
+
+Returns
+-------
+keys    : list
+    layer identifiers
+titles  : list  of str
+    layer titles
+descriptions : list of str
+    layer descriptions
+bboxs   : list of floats
+    layer bounding boxes
+
+get_slga_layers(layernames, bbox, outpath, resolution=3, depth_min=0, depth_max=200, get_ci=True, verbose=False)
+:   Download layers from SLGA data server and saves as geotif.
+Parameters
+----------
+layernames : list of layer names
+bbox : bounding box [min, miny, maxx, maxy] in
+resolution : resolution in arcsec (Default: 3 arcsec ~ 90m, which is native resolution of SLGA data)
+depth_min : minimum depth (Default: 0 cm). If depth_min and depth_max are lists, then must have same length as layernames
+depth_max : maximum depth (Default: 200 cm, maximum depth of SLGA data)
+outpath : output path
+
+Returns
+-------
+fnames_out : list of output file names
+
+TBD: check that Request image size does not exceeds allowed limit. Set Timeout?
+
+get_slgadict()
+:   Get dictionary of SLGA data.
+The Soil Facility produced a range of digital soil attribute products.
+Each product contains six digital soil attribute maps, and their upper and lower confidence limits,
+representing the soil attribute at six depths: 0-5cm, 5-15cm, 15-30cm, 30-60cm, 60-100cm and 100-200cm.
+These depths are consistent with the specifications of the GlobalSoilMap.net project (http://www.globalsoilmap.net/).
+The digital soil attribute maps are in raster format at a resolution of 3 arc sec (~90 x 90 m pixels).
+
+Period (temporal coverage; approximately): 1950-2013;
+Spatial resolution: 3 arc seconds (approx 90m);
+Data license : Creative Commons Attribution 3.0 (CC By);
+Target data standard: GlobalSoilMap specifications;
+Format: GeoTIFF.
+
+Run function get_capabilities(url) to update dictionary
+
+Returns
+-------
+slgadict : dictionary of National Soil Map data
+
+get_wcsmap(url, identifier, crs, bbox, resolution, outfname)
+:   Download and save geotiff from WCS layer
+Parameters
+----------
+url : str
+identifier : str
+    layer identifier
+crs : str
+    layer crs
+bbox : list
+    layer bounding box
+resolution : int
+    layer resolution
+outfname : str
+    output file name
+
+getdict_license()
+:   Retrieves the SLGA license and attribution information as dict
+identifier2depthbounds(depths)
+:   Get min and max depth of list of depth strings
+Parameters
+----------
+depth_list: list of depth
+
+Returns
+-------
+min depth
+max depth
+
+plot_raster(infname)
+:   Read in raster tif with rasterio and visualise as map
+Parameters
+----------
+infname : str
+
+test_wcs()
+:",773
+LICENSE,GNU Lesser General Public License,"Version 3, 29 June 2007 Copyright © 2007 Free Software Foundation, Inc. <http://fsf.org/ (http://fsf.org/)> Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is not allowed.. This version of the GNU Lesser General Public License incorporates the terms and conditions of version 3 of the GNU General Public License, supplemented by the additional permissions listed below.. 0.. Additional Definitions As used herein, “this License” refers to version 3 of the GNU Lesser General Public License, and the “GNU GPL” refers to version 3 of the GNU General Public License.. “The Library” refers to a covered work governed by this License, other than an Application or a Combined Work as defined below.. An “Application” is any work that makes use of an interface provided by the Library, but which is not otherwise based on the Library.. Defining a subclass of a class defined by the Library is deemed a mode of using an interface provided by the Library.. A “Combined Work” is a work produced by combining or linking an Application with the Library.. The particular version of the Library with which the Combined Work was made is also called the “Linked Version”.. The “Minimal Corresponding Source” for a Combined Work means the Corresponding Source for the Combined Work, excluding any source code for portions of the Combined Work that, considered in isolation, are based on the Application, and not on the Linked Version.. The “Corresponding Application Code” for a Combined Work means the object code and/or source code for the Application, including any data and utility programs needed for reproducing the Combined Work from the Application, but excluding the System Libraries of the Combined Work.. 1.. Exception to Section 3 of the GNU GPL You may convey a covered work under sections 3 and 4 of this License without being bound by section 3 of the GNU GPL.. 2.. Conveying Modified Versions If you modify a copy of the Library, and, in your modifications, a facility refers to a function or data to be supplied by an Application that uses the facility (other than as an argument passed when the facility is invoked), then you may convey a copy of the modified version:   a) under this License, provided that you make a good faith effort to ensure that, in the event an Application does not supply the function or data, the facility still operates, and performs whatever part of its purpose remains meaningful, or   b) under the GNU GPL, with none of the additional permissions of this License applicable to that copy.. 3..",534
+getdata_landscape,Module geodata_harvester.getdata_landscape,"Download landscape data from Soil and Landscape Grid of Australia (SLGA).
+Core functionality:
+- Retrieval of WCS capability  with function get_capabilities()
+- automatic download landscape data via Web Coverage Service (WCS)
+- clip data to custom bounding box
+- save data as multi-band geotif
+- plot data as map
+The landscape layers and metadata are described as dictionary in the module function get_landscapedict()
+and the respective licensing and attribution are available with the module function getdict_license()
+More details about the data and attributions can be found here:
+https://www.clw.csiro.au/aclep/soilandlandscapegrid/ProductDetails-LandscapeAttributes.html
+This package is part of the Data Harvester project developed for the Agricultural Research Federation (AgReFed).
+Copyright 2022 Sydney Informatics Hub (SIH), The University of Sydney
+This open-source software is released under the LGPL-3.0 License.
+Author: Sebastian Haan",200
+getdata_landscape,Functions,"get_capabilities()
+:   Get capabilities from WCS layer
+Parameters
+----------
+url : str
+    layer url
+
+Returns
+-------
+keys    : list
+    layer identifiers
+titles  : list  of str
+    layer titles
+descriptions : list of str
+    layer descriptions
+bboxs   : list of floats
+    layer bounding boxes
+
+get_landscape_layers(layernames, bbox, outpath, resolution=3)
+:   Download landscape layers from SLGA data server and saves as geotif.
+Parameters
+----------
+layernames : list of layer names
+bbox : bounding box [min, miny, maxx, maxy] in
+resolution : resolution in arcsec (Default: 3 arcsec ~ 90m, which is native resolution of SLGA data)
+outpath : output path
+
+Returns
+-------
+fnames_out : list of output file names
+
+TBD: check that Request image size does not exceeds allowed limit. Set Timeout?
+
+get_landscapedict()
+:   Get dictionary of landscape SLGA data.
+    The landscape attribute products available from the Soil and Landscape Grid of Australia (SLGA)
+    were derived from DEM-S, the smoothed version of the national 1 second resolution Digital Elevation Model,
+    which was derived from the 1 second resolution Shuttle Radar Topography Mission (SRTM) data acquired by NASA in February 2000.
+Spatial resolution: 3 arc seconds (approx 90m);
+Data license : Creative Commons Attribution 3.0 (CC By);
+Format: GeoTIFF.
+
+Run function get_capabilities(url) to update dictionary
+
+Returns
+-------
+ldict : dictionary of National Soil Map data
+
+get_wcsmap(url, identifier, crs, bbox, resolution, outfname, layername)
+:   Download and save geotiff from WCS layer
+Parameters
+----------
+url : str
+identifier : str
+    layer identifier
+crs : str
+    layer crs
+bbox : list
+    layer bounding box
+resolution : int
+    layer resolution
+outfname : str
+    output file name
+
+getdict_license()
+:   Retrieves the SLGA license and attribution information as dict
+plot_raster(infname)
+:   Read in raster tif with rasterio and visualise as map
+Parameters
+----------
+infname : str
+
+test_wcs()
+:",480
+utils,Module geodata_harvester.utils,"Utility functions for use in the Agrefed data harvesting pipeline.
+--Function List, in order of appearence--
+plot_rasters: Plots a list of rasters.
+_getFeatures (internal): Extracts rasterio compatible test from geodataframe.
+reproj_mask: Masks a raster to the area of a shape, and reprojects.
+reproj_rastermatch: Reproject a file to match the shape and projection of
+    existing raster.
+reproj_raster: Reproject and clip for a given output resolution, crs and bbox.
+_read_file (internal): Reads raster with rasterio returns numpy array
+aggregate_rasters: Averages (or similar) over multiple files and multiple
+    channels.
+aggregate_multiband: Averages (or similar) over multiple files but keeps
+    multi-channels independent.
+_get_coords_at_point (internal): Finds closest index of a point-location in an
+    array (raster).
+raster_query: Given a longitude,latitude value, return the value at that point
+    of a raster/tif.
+init_logtable: Stores metdata for each step of raster download and processing.
+update_logtable: Updates each the logtable with new information.",246
+utils,Functions,"aggregate_multiband(file_list=None, data_dir=None, agg=['mean'], outfile='aggregation')
+:   Aggregates over multiple files but keeps channels independently.
+    Results are written to new tif files.
+Parameters
+----------
+file_list : list of strings
+    List of files to aggregate
+data_dir : string
+    Path to directory containing files
+agg : list of strings
+    List of aggregation methods to apply
+outfile : string
+    Name of output file
+
+Returns
+-------
+outfname_list : list of strings of output file names
+channel_list : list of strings of channel names
+agg_list : list of strings of aggregation methods
+
+aggregate_rasters(file_list=None, data_dir=None, agg=['mean'], outfile='aggregation')
+:   Aggregrates over multiple files and over all channels
+    and writes results to new tif file(s).
+Parameters
+----------
+file_list : list of strings
+    List of files to aggregate
+data_dir : string
+    Path to directory containing files
+agg : list of strings
+    List of aggregation methods to apply (mean, median, sum, perc95, perc5)
+outfile : string
+    Name of output file
+
+Returns
+-------
+list_outfnames : list of strings of output file names
+
+coreg_raster(i0, j0, data, region)
+:   Coregisters a point with a buffer region of a raster.
+INPUTS
+    i0: column-index of point of interest
+    j0: row-index of point of interest
+    data: two-dimensional numpy array (raster)
+    region: integer, same units as data resolution
+
+RETURNS
+    pts: all values from array within region
+
+init_logtable()
+:   Create a log table to store information from the raster download or processing.
+RETURNS:
+    df_log: dataframe to update
+
+msg_dl(message, log=False)
+:   Prints a downloading message
+msg_err(message, log=False)
+:   Prints an error message
+msg_info(message, icon=True, log=False)
+:   Prints an info message
+msg_success(message, log=False)
+:   Prints a success message
+msg_warn(message, log=False)
+:   Prints a warning message
+plot_rasters(rasters, longs=None, lats=None, titles=None)
+:   Plots multiple raster files (.tif) on a grid of nicely arranged figures.
+Parameters:
+    raster: list of filenames (.tif).
+        Will only read the first band/channel if multiband.
+    longs: optional x values in list like object for plotting as points 
+        over raster images.
+    lats: optional x values in list like object for plotting as points
+        over raster images.
+    titles: title of plot default is raster file name.
+
+Returns:  
+    None
+
+points_in_circle(circle, arr)
+:   A generator to return all points whose indices are within a given circle.
+    http://stackoverflow.com/a/2774284
+    Warning: If a point is near the the edges of the raster it will not loop
+    around to the other side of the raster!
+INPUTS
+circle: a tuple of (i0, j0, r) where i0, j0 are the indices of the center of the circle and r is the radius
+
+arr: a two-dimensional numpy array
+
+RETURNS
+A generator that yields all points within the circle
+
+raster_query(longs, lats, rasters, titles=None)
+:   given a longitude,latitude value, return the value at that point of the
+        first channel/band in the raster/tif.
+INPUTS
+    longs:list of longitudes
+    lats:list of latitudes
+    rasters:list of raster filenames (as strings)
+    titles:list of column titles (as strings) that correspond to rasters (if none provided, rasternames will be used)
+
+RETURNS
+    gdf: geopandas dataframe where each row is long/lat point,
+        and columns are rasterfiles
+
+reproj_mask(filepath, bbox, crscode=4326, filepath_out=None)
+:   Clips a raster to the area of a shape, and reprojects.
+INPUTS
+    filepath: input filename (tif)
+    bbox: shapely geometry(polygon) defining mask boundary
+    crscode: optional, coordinate reference system as defined by EPSG
+    filepath_out: optional, the optional output filename of the raster. If False, 
+    does not save a new file
+
+RETURNS
+    out_img: numpy array of the clipped and reprojected raster
+
+reproj_raster(infile, outfile, bbox_out, resolution_out=None, crs_out='EPSG:4326', nodata=0)
+:   Reproject and clip for a given output resolution, crs and bbox.
+    Output file is written to disk.
+Parameters
+----------
+infile : (string) path to input file to reproject
+outfile : (string) path to output file tif
+bbox_out : (left, bottom, right, top)
+resolution_out : (float) resolution of output raster
+crs_out : default ""EPSG:4326""
+nodata : (float) nodata value for output raster
+
+reproj_rastermatch(infile, matchfile, outfile, nodata)
+:   Reproject a file to match the shape and projection of existing raster.
+    Output file is written to disk.
+Parameters
+----------
+infile : (string) path to input file to reproject
+matchfile : (string) path to raster with desired shape and projection
+outfile : (string) path to output file tif
+nodata : (float) nodata value for output raster
+
+spin(message=None, colour='magenta', events=1, log=False)
+:   Spin animation as a progress inidicator
+update_logtable(df_log, filenames, layernames, datasource, settings, layertitles=[], agfunctions=[], loginfos=[], force=False)
+:   Update the dataframe table with the information from the raster download or processing.
+    The dataframe is simultaneoulsy saved to a csv file in default output directory.
+INPUTS
+df_log: dataframe to update
+filenames: list of filenames to add to the dataframe (captured in output of getdata_* functions)
+layernames: list of layernames to add to the dataframe (must be same length as filenames)
+datasource: datasource of the rasters (e.g. 'SLGA', 'SILO', 'DEA', see settings)
+settings: settings Namespace object
+layertitles: list of layer titles to add to the dataframe; if empty or none provided, it will be inferred from settings
+agfunctions: list of aggregation functions to add to the dataframe; if empty or none provided, it will be inferred from settings
+loginfos: string or list of log information strings to add to the dataframe;
+
+RETURNS
+df_log: updated dataframe
+",1423
+getdata_silo,Module geodata_harvester.getdata_silo,"Python script to automatically download and crop climate data layers from SILO.
+Functionalities:
+- download SILO data for custom time period and layer(s) as defined in dictionary
+- clip data to custom bounding box
+- save data as multi-band geotiff or netCDF
+The SILO climate layers are described as dictionary in the module function get_silodict()
+and the SILO licensing and attribution are availabe with the module function getdict_license()
+More details on the SILO climate variables can be found here:
+https://www.longpaddock.qld.gov.au/silo/about/climate-variables/
+and more details about the gridded data structure here:
+https://www.longpaddock.qld.gov.au/silo/gridded-data/
+and a data index:
+https://s3-ap-southeast-2.amazonaws.com/silo-open-data/Official/annual/index.html
+This package is part of the Data Harvester project developed for the Agricultural Research Federation (AgReFed).
+Copyright 2022 Sydney Informatics Hub (SIH), The University of Sydney
+This open-source software is released under the LGPL-3.0 License.
+Author: Sebastian Haan",243
+getdata_silo,Functions,"download_file(url, layername, year, outpath='.'). :   download file from url INPUT: url : str outpath : str  OUTPUT: file : str  get_SILO_layers(layernames, date_start, date_end, outpath, bbox=None, format_out='tif', delete_tempfiles=False, verbose=False) :   Get raster data from SILO for certain climate variable and save data as geotif.. If multiple times are requested, then each time will be saved in on band of multi-band geotif.. All layers are available with daily resolution (except 'monthly_rain') This function includes validation of years and automatically download of data from SILO in temporary folder..",147
+getdata_radiometric,Module geodata_harvester.getdata_radiometric,"Script to download Radiometric data from NCI’s GSKY Data Server (using WCS) for a given
+resolution, and bounding box. Final data is saved as geotiff or NetCDF.
+A full ist of datasets can be retrieved with get_radiometricdict() or get_capabilities() for a given url
+An overview of all datasets can be also found here:
+https://opus.nci.org.au/display/Help/Datasets
+For more details of the NCI GSKY WCS, please see here:
+https://opus.nci.org.au/pages/viewpage.action?pageId=137199852
+LIMITATIONS: for some layers the server readout time can occasionally exceed 30s (longer readout time in request seems to be ignored)
+In case this happens please try later again when the NCI server is less loaded.
+This package is part of the Data Harvester project developed for the Agricultural Research Federation (AgReFed).
+Copyright 2022 Sydney Informatics Hub (SIH), The University of Sydney
+This open-source software is released under the LGPL-3.0 License.
+Author: Sebastian Haan",231
+getdata_radiometric,Functions,"get_capabilities()
+:   Get capabilities from WCS layer.
+Parameters
+----------
+url : str
+    layer url
+
+Returns
+-------
+keys    : list
+    layer identifiers
+titles  : list  of str
+    layer titles
+descriptions : list of str
+    layer descriptions
+bboxs   : list of floats
+    layer bounding boxes
+
+get_radiometric_image(outfname, layername, bbox, url, resolution=1, crs='EPSG:4326', format_out='GeoTIFF')
+:   Download radiometric data layer and save geotiff from WCS layer.
+Parameters
+----------
+outfname : str
+    output file name
+layername : str
+    layer identifier
+bbox : list
+    layer bounding box
+resolution : int
+    layer resolution in arcsec
+url : str
+    url of wcs server
+crs: str
+    crsm default 'EPSG:4326'
+format: str
+    output format, either ""GeoTIFF"" or ""NetCDF""
+
+Return
+------
+Exited ok: boolean
+
+get_radiometric_layers(outpath, layernames, bbox, resolution=1, crs='EPSG:4326', format_out='GeoTIFF')
+:   Wrapper function for downloading radiometric data layers and save geotiffs from WCS layer.
+Parameters
+----------
+outpath: str
+    output path
+layername : list of strings
+    layer identifiers
+bbox : list
+    layer bounding box
+resolution : int
+    layer resolution in arcsec
+url : str
+    url of wcs server
+crs: str
+    crsm default 'EPSG:4326'
+format_out: str
+    output format, either ""GeoTIFF"" or ""NetCDF""
+
+Return
+------
+list of output filenames
+
+get_radiometricdict()
+:   Returns dictionary of keys and layer titles
+To update manually please run get_capabilities() to retrieve all current layer details
+
+get_times(url, layername, year=None)
+:   Return available dates for layer.
+Parameters
+----------
+url: str, layer url
+layername: str, name of layer id
+year: int or str, year of interest (if None, times for all available years are returned)
+
+Return
+------
+list of dates
+
+getdict_license()
+:   Retrieves the Geoscience Australia data license and NCI attribution information as dict
+plot_raster(infname)
+:   Read in raster tif with rasterio and visualise as map.
+Parameters
+----------
+infname : str
+
+test_get_capabilities()
+:   Test script to retrieve WCS capabilities
+test_get_radiometric_image()
+:   Test script to retrieve and save image for one layer
+test_get_times()
+:   Test script to retrieve available times for a layer
+test_times()
+:   Check that there is only one time per layers.",579
+getdata_dem,Module geodata_harvester.getdata_dem,"This script downloads the National Digital Elevation Model (DEM) 1 Second Hydrologically Enforced product,
+derived from the National DEM SRTM 1 Second and National Watercourses, lakes and Reservoirs.
+The output image is a geotiff file with a user defined resolution and bbox.
+This script also includes the capabilities to generate slope and aspect from the extracted DEM.
+Core functions:
+    get_capabilities(): get the available layers and their metadata
+    getwcs_dem(): download the data as geotiff file for given bbox and resolution
+    dem2slope(): convert geotiff to slope raster
+    dem2aspect(): convert geotiff to aspect raster
+    getdict_license(): get the license and attributes for the DEM 1 arc second grid
+The DEM layer metadata can be retrieved with the function get_capabilities().
+and the respective licensing and attribution are availabe with the module function getdict_license()
+To download the DEM data, the function getwcs_dem() is used.
+For more details about the data, see:
+https://ecat.ga.gov.au/geonetwork/srv/eng/catalog.search#/metadata/72759
+WCS url:
+https://services.ga.gov.au/site_9/services/DEM_SRTM_1Second_Hydro_Enforced/MapServer/WCSServer?request=GetCapabilities&service=WCS
+This package is part of the Data Harvester project developed for the Agricultural Research Federation (AgReFed).
+Copyright 2022 Sydney Informatics Hub (SIH), The University of Sydney
+This open-source software is released under the LGPL-3.0 License.
+Author: Sebastian Haan",336
+getdata_dem,Functions,"dem2aspect(fname_dem)
+:   Calculate aspect from DEM and save as geotiff
+Parameters
+----------
+fname_dem : str
+    DEM file name
+
+dem2slope(fname_dem)
+:   Calculate slope from DEM and save as geotiff
+Parameters
+----------
+fname_dem : str
+    DEM path + file name
+
+get_capabilities(url)
+:   Get capabilities from WCS layer.
+Parameters
+----------
+url : str
+    layer url
+
+Returns
+-------
+keys    : list
+    layer identifiers
+titles  : list  of str
+    layer titles
+descriptions : list of str
+    layer descriptions
+bboxs   : list of floats
+    layer bounding boxes
+
+get_dem_layers(layernames, outpath, bbox, resolution=1, crs='EPSG:4326')
+:   Wrapper funtion to get the layers from the Geoscience Australia DEM 1 arc second grid
+    and to calculate slope and aspect layers
+Parameters
+----------
+layernames : list
+    list of layer names to download
+    ['DEM', 'Slope', 'Aspect']
+outpath : str
+    output directory for the downloaded file
+bbox : list
+    layer bounding box
+resolution : int
+    layer resolution in arcsec (default 1)
+crs: str
+    crs default 'EPSG:4326'
+
+Return
+------
+Output outnames: lits of output filenames
+
+get_demdict()
+:   Get dictionary of meta data
+OUTPUT:
+layerdict : dict
+    dictionary of meta data
+
+getdict_license()
+:   Retrieves the Geoscience Australia data license for the DEM Web Map Service as dict
+getwcs_dem(outpath, bbox, resolution=1, url='https://services.ga.gov.au/site_9/services/DEM_SRTM_1Second_Hydro_Enforced/MapServer/WCSServer?request=GetCapabilities&service=WCS', crs='EPSG:4326', verbose=False)
+:   Function to download and save geotiff from WCS layer.
+    Default downloads the DEM 1 arc second grid from Geoscience Australia using the folllwing WCS url:
+    Url = https://services.ga.gov.au/site_9/services/DEM_SRTM_1Second_Hydro_Enforced/MapServer/WCSServer?request=GetCapabilities&service=WCS
+Parameters
+----------
+outpath : str
+    output directory for the downloaded file
+bbox : list
+    layer bounding box
+resolution : int
+    layer resolution in arcsec (default 1)
+url : str
+    url of wcs server, default is the Geoscience Australia DEM 1 arc second grid
+crs: str
+    crs default 'EPSG:4326'
+
+Return
+------
+Output filename
+
+plot_raster(infname)
+:   Read in raster tif with rasterio and visualise as map
+Parameters
+----------
+infname : str
+
+test_getwcs_dem(outpath='./test_DEM/')
+:   Test script",614
+How_to_add_DataSources,How to add new Data Sources,"The Geodata-Harvester is designed to be extendable and new data source modules can be added as Python modules. The naming convention for the data modules are getdata_SOURCENAME.py with SOURCENAME as the data source name. For an example adding a WebMap service request (WMS/WCS) see getdata_radiometric.py, or for requesting raster data from an AWS server, see as example getdata_silo.py.  
+Each data source module consists of at least three core functions:
+
+get_layers function with the following main arguments:
+date_start
+date_end
+bbox
+resolution
+outpath
+verbose (boolean, for logging options)
+other optional arguments could be crs (typically ""EPSG:4326""), output_format (typically ""GeoTIFF"" or ""netCDF"")
+
+
+get_capabilities() : returns data server capabilities such as available layernames and metadata (helpful for developing get data requests and documentation)
+get_dict(): returns dictionary of data source selected layernames, options, attributions and license (helpful for validation test, widget selections, and automating attributions/ licensing)
+
+To invoke the new data source module, you need to import the module (e.g., in your Jupyter notebook) and add new source-name to the settings YAML file under the entry target_sources:, with layername and options as sublist or dict (see existing data source settings as example). This will enable to load the settings into the settings Namespace (via load_settings function in harvesterwidgets.py). 
+To integrate a new module into the geodata-harvester package, you may need to modify the following files:
+
+src/geodata_harveseter/init.py (for making new module available in package NameSpace)
+src/geodata_harveseter/harvest.py (to automate aggregation with all other layers by callinbg one function)
+src/geodata_harveseter/widgets/harvesterwidgets.py (to include and select settings for the new data source via Jupyter widgets)
+src/geodata_harveseter/validate_settings.py (optional)
+update documentation Data_Overview.md
+
+Please add test functions for the new data module (either in the module file or as sepepare test script in folder tests). Adding an example notebook that demonstrates how to use new data source is encouraged as well.
+For development of new data source modules, we recommend to fork the geodata-harvester repo and develop new modules in a local environment (see environment.yaml). If you would like to contribute your data source module to the geodata-harvester package, please visit the geodata-harvester contribution guidelines.",537
+README,Geodata-Harvester,"Automate geodata harvesting from the web and jumpstart your analysis with a ready-made set of spatial-temporal processed maps and dataframes.
+
+
+
+
+
+
+
+The Geodata-Harvester Python package offers reusable and automated workflows for data extraction from a wide range of geospatial and environmental data sources. User provided data is auto-completed with a suitable set of spatial- and temporal-aligned covariates as a ready-made dataset for machine learning and environmental models. In addition, all requested data layer maps are automatically extracted and aligned for a specific region and time period.
+For the R-package wrapper of the Geodata-Harvester, please visit the Github dataharvesteR project (https://github.com/Sydney-Informatics-Hub/dataharvester).",151
+README,Content,"
+Introduction
+Data Sources
+Functionality
+Key Features
+Installation
+Conda or Mamba
+PyPI
+Google Earth Engine extension
+Local development
+Workshop Cloud Sandbox
+
+
+How to get started
+How to add new data source modules
+Code reference API
+Contributions
+Attribution and Acknowledgments
+License
+",66
+README,Introduction,"There is an enormous amount of national/global space-time data that is free and accessible. Examples are the numerous satellite platforms, weather, soil landscape grid of Australia. Many have a temporal dimension so for any point in Australia you can extract a time series of remote sensing and weather data and soil and terrain site variables. In the case of time series covariates there are a number of post-processing steps that a user can undertake to extract meaning, e.g. temporal means, aggregating in time. All of the above is a non-trivial task and a workflow where a user could enter a point (s) and get a tidy data frame of data cube variables would be a step towards people understanding its value and being able to jumpstart their analysis. This project will contribute processing tools for finding, extracting and converting these key data layers.
+Developed as part of the Agricultural Research Federation (AgReFed), Geodata-Harvester is an open-source software that allows users to jumpstart their analysis with a suitable set of spatial-temporal aligned raster maps and dataframes.",215
+README,Data Sources,"A detailed list of all available layers and their description can be found in Data Overview.
+The following main data sources are currently implemented:
+
+Soil and Landscape Grid of Australia (SLGA)
+SILO Climate Database
+National Digital Elevation Model (DEM) 1 Second Hydrologically Enforced
+Digital Earth Australia (DEA) Geoscience Earth Observations
+GSKY Data Server for DEA Geoscience Earth Observations
+Radiometric Data
+Google Earth Engine Data (GEE account needed), see for overview Earth_Engine_Data_Overview.
+",112
+README,Functionality,"The main goal of the Data Harvester is to enable researchers with reusable workflows for automatic data extraction and processing:
+
+Retrieve: given set of locations, automatically access and download multiple data sources (APIs) from a diverse range of geospatial and soil data sources
+Process: Spatial and temporal processing, conversion to dataframes and custom raster-files
+Output: Ready-made dataset for machine learning (training set and prediction mapping)
+
+Geodata-Harvester is designed as a modular and maintainable project in the form of a multi-stage pipeline by providing explicit boundaries among tasks. To encourage interaction and experimentation with the pipeline, multiple frontend notebooks and use case scenarios are provided.",133
+README,Key Features,"Below is a list of features available for the geodata-harvester package. Please check the project Github webpage and notebooks for examples, data selection, and other settings.
+
+enabling reproducible workflows via YAML settings files
+automatic data retrieval from geodata APIs for given locations and dates
+automatic download and spatial-temporal processing of geo-spatial maps for user-specified bounding box, resolution, and time-scale.
+support for multiple temporal aggregation options and spatial-temporal buffer
+automatic extraction of retrieved data into ready-made dataframes for ML training
+automatic generation of ready-made aligned maps and data for ML prediction models
+visualisation of downloaded and aligned maps
+support for saving and loading settings via interactive widgets
+with connectivity support to the Google Earth Engine API, perform petabyte-scale operations which include temporal cloud/shadow masking and automatic calculation of spectral indices
+
+For more features, please see the API reference documentation (https://sydney-informatics-hub.github.io/geodata-harvester/API/geodata_harvester/index.html).",206
+README,Installation,"Geodata-Harvester can be run on cloud-servers (e.g., in JupyterHub environment) or on your local machine. 
+Example notebooks for importing and using the package can be found in the folder notebooks (https://github.com/Sydney-Informatics-Hub/geodata-harvester/tree/main/notebooks). The package can be installed via PyPI or Conda:
+Conda or Mamba
+The package geodata-harvester is available via the conda-forge channel:
+bash
+conda install geodata-harvester -c conda-forge
+Note that the geodata-harvester is imported with underscore as 
+Python
+import geodata_harvester
+PyPI
+Installation via PyPI requires a pre-installation of gdal (see, e.g., pypi.org/project/GDAL/installation guide (https://pypi.org/project/GDAL/)) in your environment. Once gdal is installed, you can install geodata-harvester via
+bash
+pip install geodata-harvester
+The geodata-harvester library can then be imported via
+Python
+import geodata_harvester
+Google Earth Engine extension
+Optionally you can include Google Earth Engine (GEE) data in Geodata-Harvester (see Settings_Overview).
+GEE requires a Google account and a GEE authorization. If this is your first time using GEE, please follow these instructions (https://earthengine.google.com/signup/) and authorise Geodata-Harvester to use the Google Earth Engine API. See a preview of the process here (https://sydney-informatics-hub.github.io/AgReFed-Workshop/pydocs/setup-gee.html#part-ii-authorising-your-workstation-with-gee).
+NOTE: You only have to perform this authorisation ONCE. Or at least you only have to do it once per “connection” or if you use an incognito window.  
+Local development
+If you like to develop Data Harvester locally, it is recommended to setup a virtual environment for the installation, e.g., via conda miniforge (see for dependencies environment.yaml) and to fork the Geodata-harvester repo. To install only the latest development version use:
+bash
+pip install git+https://github.com/Sydney-Informatics-Hub/geodata-harvester
+Workshop Cloud Sandbox
+As play-ground for workshop training sessions and testing of the Geodata-Harvester we provide a pre-installed cloud Python Jupyterlab environment, which does not require any local installation. For login instructions and how to access the sandbox, please visit our Python workshop page (https://sydney-informatics-hub.github.io/AgReFed-Workshop/pydocs/py00-workshop.html).
+The Jupyter environment is hosted on the ARDC Nectar Research Cloud in partnership with AgReFed and Australian Research Data Commons (ARDC). Note that this sandbox is currently hosted for test purposes only and generated data is not permanently stored.
+The Geodata-Harvester can be easily installed also on other cloud services (e.g., Google Colab, Azure Notebooks).",644
+README,How to get started,"You may now invoke the geodata-harvester directly from a python terminal with:
+python
+import geodata_harvester as gh
+gh.harvest.run(PATH_TO_SETTINGS_YAMLFILE)
+Note the subtle but important difference in use of an underscore _ to import the package and the use of a dash - to install it!
+To get started, some example workflows are provided as Jupyter notebooks:
+
+
+Options and user settings are defined by the user in the settings; see for settings documentation Settings_Overview
+
+
+Run the jupyter notebook in the folder notebooks (https://github.com/Sydney-Informatics-Hub/geodata-harvester/tree/main/notebooks).
+
+
+If you would like to learn more about the Geodata-Harvester, please visit our Workshop webpage (https://sydney-informatics-hub.github.io/AgReFed-Workshop/).",176
+README,How to add new data source modules,"The Geodata-Harvester is designed to be extendable and new data source modules can be added as Python modules (for examples, see getdata_*.py modules). If you would like to add a new data source, please follow the adding new data source guidelines 
+We recommend to fork the geodata-harvester repo and develop new modules in a local environment. If you would like to contribute your data source module to the geodata-harvester package, please visit the geodata-harvester contribution guidelines.",106
+README,Code reference API,An auto-generated API reference documentation is available here (https://sydney-informatics-hub.github.io/geodata-harvester/API/geodata_harvester/index.html).,36
+README,Contributions,"We are happy for any contribution to the geodata-harvester, whether feedbacks and bug reports via github Issues, adding use-case examples via notebook contributions, to improving source-code and adding new or updating existing data source modules. 
+For more details about about how to contribute to the development, please visit the Geodata-Harvester contribution guidelines.",71
+README,Attribution and Acknowledgments,"This software was developed by the Sydney Informatics Hub, a core research facility of the University of Sydney, as part of the Data Harvesting project for the Agricultural Research Federation (AgReFed).
+Acknowledgments are an important way for us to demonstrate the value we bring to your research. Your research outcomes are vital for ongoing funding of the Sydney Informatics Hub.
+If you make use of this software for your research project, please include the following acknowledgment:
+“This research was supported by the Sydney Informatics Hub, a Core Research Facility of the University of Sydney, and the Agricultural Research Federation (AgReFed).""
+AgReFed is supported by the Australian Research Data Commons (ARDC) and the Australian Government through the National Collaborative Research Infrastructure Strategy (NCRIS).",155
+README,License,"Copyright 2023 The University of Sydney
+This is free software: you can redistribute it and/or modify it under
+the terms of the GNU Lesser General Public License (LGPL version 3) as
+published by the Free Software Foundation.
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser
+General Public License for more details.
+You should have received a copy of the GNU Lesser General Public License along with this program (see LICENSE). If not, see
+https://www.gnu.org/licenses/ (https://www.gnu.org/licenses/).",138
+Settings_Overview,Overview and Description of Settings for the AgReFed Data-Harvester,"The following documentation outlines the available settings for the Data Harvester.
+For a more interactive exploration of settings, please use the harvesterwidget (see, e.g., example widget notebook (https://github.com/Sydney-Informatics-Hub/geodata-harvester/blob/main/notebooks/example_harvest_with_widgets.ipynb)).",72
+Settings_Overview,Table of Contents,"
+YAML File Format
+Jupyter Settings Widget
+Settings Validation
+Input and Output Settings
+Spatial and Temporal Settings
+Data Selection Settings
+",32
+Settings_Overview,YAML File Format,"The settings are specified by the user in a .yaml settings file (see e.g., settings/settings_v0.3.yaml). A YAML file is a Unicode based language and is designed for human interaction and to work well with modern programming languages, and is typically used for configuration settings and reusable workflows. YAML uses the .yaml extension (alternatively .yml) for its files. Its syntax is independent of a specific programming language. 
+Templates for the .yaml settings file are provided in the folder settings. More information about YAML Syntax can be found here (https://docs.fileformat.com/programming/yaml/).",127
+Settings_Overview,Jupyter Settings Widget,"Alternatively, settings can be selected in the interactive widget of the Jupyter Notebook, which also automatically saves all settings for a run in a .yaml file as well. The interactive widgets are powered by ipywidgets and are currently supported for the Jupyter Notebooks. The widget also allows the user to load a saved .yaml file.
+Note for developers: To make changes to the functionality of the widgets (e.g, extending with new settings or options), please see the script harvesterwidgets.py in the folder widgets.",107
+Settings_Overview,Settings Validation,"The settings file can be validated and checked for correct options (e.g. valid schema, data types, and data ranges) via the function validate in validate_settings.py, e.g.:
+python
+fname_settings = 'settings_harvest.yaml'
+import validate_settings
+validate_settings.validate(fname_settings)
+Note for developers: Please update validate_settings.py and version if new data layers or options are added to the Data-Harvester.",89
+Settings_Overview,Input and Output Settings,"The input file name is specified in infile and is a .csv file that and must include at least point coordinates. The Data Harvester will download new data for these coordinates and  align with any given data in the input file. Th  column names for the latitude and longitude coordinates are selected by the settings colname_lat and colname_lng, respectively.
+All data results and images will be saved in the output directory as specified in the settings outpath.
+Example:
+```yaml",98
+Settings_Overview,Input File:,infile: ../testdata/Pointdata_Llara.csv,14
+Settings_Overview,Spatial and Temporal Settings,"The spatial extent of the requested images can be given as bounding box list in the settings target_bbox, in the order: lng_min, lat_min, lng_max, lat_max (left, bottom, right, top corner of box). If no bounding box is provided, Geodata-Harvester will automatically infer a padded bounding box based on the extent of the coordinates given in the input file.
+The spatial resolution of the requested images is specified in target_res and given in arcsec (1 arcsec corresponds to roughly 30m on the Equator, please see arc2meter.pyfor calculating exact conversion of meter to arcsec and vice versa).
+The time range for the requested data is specified via minimum date date_min and maximum date date_max (format: YYYY-MM-DD). All data available withon this time interval will be extracted.
+For data extraction, the user can choose a number of times slices for the given period which is given as integer number temp_intervals. The time buffer window can be provided as number of days in temp_buffer, which specifies the number of days for which data is aggregated around each time slice. For example, if date_min to date_max is 24 weeks, temp_intervals = 24, and temp_buffer = 7, the data-table will be populated with the aggregated stats for each week within the specified time period. If temp_buffer is set to 1, the nearest available date will be extracted for each time slice.
+Example:
+```yaml",299
+Settings_Overview,Select start date:,date_min: : 2023-01-01,14
+Settings_Overview,Select end date:,date_max: : 2023-02-01,14
+Settings_Overview,Data Selection Settings,"The requested layers are specified in the settings target_sources. The following data sources are currently supported:
+Satellite data from Digital Earth Australia:
+These are pre-processed and national calibrated satellite image layers provided  Digital Earth Australia (DEA) Geoscience Earth Observations. Multiple layers can be given as list in the settings. For more details see Data Overview DEA. 
+Digital Elevation Model (DEM):
+The DEM data is given by the National Digital Elevation Model 1 Second Hydrologically Enforced. Options are: 'DEM', 'Slope', and 'Aspect'. For more info see Data Overview DEM.
+Landscape from SLGA
+Landscape data can be retrieved from SLGA. For an overview of all available layers see Data Overview Landscape.
+Radiometric
+For an overview of the radiometric layer options see Data Overview Radiometric.
+SILO Climate Database
+SILO is containing continuous daily climate data for Australia. An overview of the available data layers is provided in Data Overview SILO.
+For each requested SILO data layer, at least one temporal aggregation method has to be provided, which will be applied to aggregate climate data over the specified temporal range. The following options are available: 'mean', 'median', 'sum', 'std', 'perc95', 'perc5', 'max', 'min'
+Soil data from SLGA
+An overview of the soil attributes is given in in Data Overview SLGA.
+Each soil attribute has six depth layers (plus their upper and lower confidence limits), with the following options:'0-5cm', '5-15cm', '15-30cm', '30-60cm', '60-100cm' and '100-200cm'. 
+Google Earth Engine Data
+An overview of the available Google Earth Engine (GEE) data and options is provided in Data Overview GEE.
+Settings for GEE are added in the entry GEE (see example with descriptions below). 
+A complete list of the available spectral indices can be found here (https://github.com/awesome-spectral-indices/awesome-spectral-indices)
+For more details on GEE settings, please visit the GEE API documentation (https://developers.google.com/earth-engine/apidocs) or eeharvest documentation  (https://github.com/Sydney-Informatics-Hub/eeharvest). 
+Note that GEE requires a Google account and a GEE authorization. If this is you first time using GEE, please follow these instructions (https://earthengine.google.com/signup/). In the next step you must authorise Geodata-Harvester to use the Google Earth Engine API. See a preview of the process here (https://sydney-informatics-hub.github.io/AgReFed-Workshop/pydocs/setup-gee.html#part-ii-authorising-your-workstation-with-gee).
+Example:
+```yaml
+target_sources:
+  #Satellite data from Digital Earth Australia
+  DEA:
+  - landsat_barest_earth
+#National Digital Elevation Model (DEM) 1 Second
+  DEM:
+  - DEM
+#Landscape Data 
+  Landscape:
+  - Slope
+  - Aspect
+  - Relief_300m
+#Radiometric Data
+  Radiometric:
+  - radmap2019_grid_dose_terr_awags_rad_2019
+  - radmap2019_grid_dose_terr_filtered_awags_rad_2019
+# SILO Climate Data
+  # temporal aggregation options: 'mean', 'median', 'sum', 'std', 'perc95', 'perc5', 'max', 'min'
+  SILO:
+    max_temp:
+    - Median
+    min_temp:
+    - Median
+    monthly_rain:
+    - Total
+#Soil data from SLGA
+  SLGA:
+   Bulk_Density:
+    - 0-5cm
+   Clay:
+    - 0-5cm
+#Satellite data layers from Google Earth Engine
+  GEE: 
+    preprocess:
+  ### collection as defined in the Earth Engine Catalog 
+  # NEW: for multiple collections please add list of collection names
+  collection: LANDSAT/LC09/C02/T1_L2
+
+  #### circular buffer in metres (optional)
+  buffer: null
+
+  #### convert buffer into square bounding box instead (optional)
+  bound: null
+
+  #### cloud masking option
+  mask_clouds: True
+
+  #### Set probability for mask cloud (between 0 to 1), optional
+  mask_probability: null
+
+  #### composite image based on summary stat provided
+  # e.g.: min, max, median, mean, stdDev (see GEE API references)
+  reduce: median
+
+  #### spectral indices to calculate via Awesome Spectral Indices site
+  # examples: NDVI, EVI, AVI, BI 
+  spectral:
+    - NDVI
+
+download:
+  # set bands (either band names or spectral index names) If multiple collections are selected, 
+  # add for each collection a list of bands, e.g., [[NDVI, SR_B2],[SR_B23, SR_B4]]
+  bands: 
+    - NDVI
+    - SR_B2
+    - SR_B3
+    - SR_B4
+
+```",1085
+settingshandler,Functions,"main(fname_settings='settings/settings_v0.1_default.yaml', to_namespace=True)
+:   Main function for running the script.
+Input:
+    fname_settings: path and filename to settings file
+",41
+Contributing,Welcome to Geodata-Harvester Contributing Guide,"Thank you for investing your time in contributing to our project! We appreciate your interest in contributing to Geodata-Harvesterproject. Your contributions can help improve the software and make it more useful for others.  
+In this guideline, we'll explain how you can contribute to the project. Contributions to the geodata-harvester can be made in many ways, such as:
+
+Feedback and bug reports via Github Issue
+Use-case examples via notebook contributions
+Source-code contributions
+Data-source contributions
+Updating existing data source modules
+Improving documentation
+",110
+Contributing,Feedback and bug reports: Create a new issue,"To report bugs or provide feedback, you can use the Github Issues feature. If you spot a problem or have a suggestion for improvement, search if an issue already exists (https://github.com/Sydney-Informatics-Hub/geodata-harvester/issues). If a related issue doesn't exist, please open a new issue. The issue should address what is the current problem, where it occurs, and, if possible, one suggestion how this problem can potentially be solved. 
+If this is a bug report, please  provide a clear and concise description of the issue and any relevant information
+such as error messages including file name and code line, installation details, and all steps to reproduce the problem.",144
+Contributing,Solve an open issue,"Scan through our existing issues (https://github.com/Sydney-Informatics-Hub/geodata-harvester/issues) to find one that interests you. As a general rule, we don’t assign issues to anyone. If you find an issue to work on, you are welcome to open a pull request with a fix.",68
+Contributing,Use-case example notebooks,"If you have an interesting use-case for the geodata-harvester, we would love to hear about it! A great way to demonstrate use-cases is via Jupyter notebooks, which provide helpful workflows to the community. Currently we maintain a few example notebooks that demonstrate some use-cases of the GeoData-Harvester. If you make use of this package, you are welcome to contribute by improving existing notebooks or creating a Jupyter Notebook with your example and sharing it with us.
+To contribute, please fork the geodata-harvester repo and add your notebook and settings file to the folder notebooks. For reproducible research we encourage the use of settings YAML files (see notebooks/settings). Please give the settings file a name that corresponds to the notebook name. Then commit your changes and create a pull request to share with us.",169
+Contributing,Documentation contributions,"For small documentation changes and suggestion to improve existing documentation, please open a new Issue. If you would like to add/edit some more documentation, please fork the repo, edit the corresponding .md file, commit the change, and submit a pull request for a review.",55
+Contributing,Source-code contributions,"We welcome contributions to improve the Python code and to keep the data-source handlers up-to-date. If you have experience with Python programming and would like to contribute to the source code, we suggest the following guidelines:
+1) Fork the repository and clone it to your local machine.
+2) Create a new branch for your changes.
+3) Write clear, concise, and well-documented code.
+4) Test your changes thoroughly.
+5) Submit a pull request with a description of your changes and any relevant information.",104
+Contributing,Data source module contributions,"If you would like to add a new data source module or update an existing one, please visit the adding new data source guidelines. Please also check if there are any open Issue requests about the data source that you would like to add. To contribute a new data source module, follow these guidelines:
+1) Check the existing data source modules for inspiration.
+2) Write clear, concise, and well-documented code.
+3) Test your changes thoroughly (test scripts and example notebook demonstrating the new data source are welcome!)
+4) Submit a pull request with a description of your changes and any relevant information.",122
+Contributing,Code of Conduct,"Please keep in mind that the geodata-harvester project follows the GitHub Community Code of Conduct (https://docs.github.com/en/site-policy/github-terms/github-community-code-of-conduct), which requires respectful and professional behavior.
+We appreciate your contributions to the geodata-harvester project and look forward to working with you! If you have any questions or need help, don't hesitate to reach out.",83
+Data_Overview,Table of Contents,"
+Soil Data 3D SLGA
+SILO Climate Database
+National Digital Elevation Model 1 Second Hydrologically Enforced
+Digital Earth Australia Geoscience Earth Observations
+GSKY Data Server for DEA Geoscience Earth Observations
+Radiometric Data
+Landscape Data SLGA
+",66
+Data_Overview,Soil Data 3D SLGA,"Description: The Soil Facility produced a range of digital soil attribute products as Soil and Landscape Grid of Australia (SLGA). Each product contains six digital soil attribute maps, and their upper and lower confidence limits, representing the soil attribute at six depths: 0-5cm, 5-15cm, 15-30cm, 30-60cm, 60-100cm and 100-200cm. 
+Module name: getdata_slga.py
+Bounding Box: Long_min: 113.00, Lat_min: -44.00, Long_max: 154.00, Lat_max: -10.00
+Period (temporal coverage; approximately): 1950-2013
+Resolution: 3 arcsec
+Source: https://www.clw.csiro.au/aclep/soilandlandscapegrid/ProductDetails-SoilAttributes.html
+License: Creative Commons Attribution 3.0 (CC By)
+Attribution: CSIRO Australia, TERN (University of Queensland), and Geoscience Australia
+Layernames:
+
+'Bulk_Density' :
+Title: Bulk Density (whole earth)
+Description: Bulk Density of the whole soil (including coarse fragments) in mass per unit volume by a method equivalent to the core method
+Unit: g/cm3
+'Organic_Carbon' :
+Title: Organic Carbon
+Description: Mass fraction of carbon by weight in the < 2 mm soil material as determined by dry combustion at 900 Celcius
+Unit: %
+'Clay' :
+Title: Clay
+Description: < 2 um mass fraction of the < 2 mm soil material determined using the pipette method
+Unit: %
+'Silt' :
+Title: Silt
+Description: 2-20 um mass fraction of the < 2 mm soil material determined using the pipette method
+Unit: %
+'Sand' :
+Title: Sand
+Description: 20 um - 2 mm mass fraction of the < 2 mm soil material determined using the pipette method
+Unit: %
+'pH_CaCl2' :
+Title: pH (CaCl2)
+Description: pH of 1:5 soil/0.01M calcium chloride extract
+Unit: none
+'Available_Water_Capacity' :
+Title: Available Water Capacity
+Description: Available water capacity computed for each of the specified depth increments
+Unit: %
+'Total_Nitrogen' :
+Title: Total Nitrogen
+Description: Mass fraction of total nitrogen in the soil by weight
+Unit: %
+'Total_Phosphorus' :
+Title: Total Phosphorus
+Description: Mass fraction of total phosphorus in the soil by weight
+Unit: %
+'Effective_Cation_Exchange_Capacity' :
+Title: Effective Cation Exchange Capacity
+Description: Cations extracted using barium chloride (BaCl2) plus exchangeable H + Al
+Unit: meq/100g
+'Depth_of_Regolith' :
+Title: Depth of Regolith
+Description: Depth to hard rock. Depth is inclusive of all regolith.
+Unit: m
+'Depth_of_Soil' :
+Title: Depth of Soil
+Description: Depth of soil profile (A & B horizons)
+Unit: m
+",662
+Data_Overview,SILO Climate Database,"Description: SILO is containing continuous daily climate data for Australia from 1889 to present.
+Module name: getdata_silo.py
+Bounding Box = Long_min: 112.00, Lat_min: -44.00, Long_max: 154.00, Lat_max: -10.00
+Updates: Daily
+Resolution: native: 180 arcsec
+Source: https://www.longpaddock.qld.gov.au/silo/gridded-data/
+License: Creative Commons Attribution 4.0 International (CC BY 4.0)
+Attribution: State of Queensland (Queensland Department of Environment and Science) 2020.
+Layernames:
+
+'daily_rain' (Daily rainfall, mm)
+'monthly_rain' (Monthly rainfall, mm)
+'max_temp' (Maximum temperature, deg C)
+'min_temp'  (Minimum temperature. deg C)
+'vp' (Vapour pressure, hPa)
+'vp_deficit' (Vapour pressure deficit, hPa)
+'evap_pan' (Class A pan evaporation, mm)
+'evap_syn' (Synthetic estimate, mm)
+'evap_comb' (Combination: synthetic estimate pre-1970, class A pan 1970 onwards, mm)
+'evap_morton_lake' (Morton's shallow lake evaporation, mm)
+'radiation'   (Solar radiation: Solar exposure, consisting of both direct and diffuse components, MJ/m2)
+'rh_tmax' (Relative humidity: Relative humidity at the time of maximum temperature, %)
+'rh_tmin' (Relative humidity at the time of minimum temperature, %)
+'et_short_crop' (Evapotranspiration FAO564 short crop, mm)
+'et_tall_crop' (ASCE5 tall crop6, mm)
+'et_morton_actual' (Morton's areal actual evapotranspiration, mm)
+'et_morton_potential' (Morton's point potential evapotranspiration, mm)
+'et_morton_wet' (Morton's wet-environment areal potential evapotranspiration over land, mm)
+'mslp' (Mean sea level pressure Mean sea level pressure, hPa)
+",463
+Data_Overview,National Digital Elevation Model 1 Second Hydrologically Enforced,"Description: Digital Elevation Model (DEM) of Australia derived from STRM with 1 Second Grid - Hydrologically Enforced
+Module name: getdata_dem.py
+Bounding Box = Long_min: 112.00, Lat_min: -44.00, Long_max: 154.00, Lat_max: -10.00
+Updates: None
+Resolution: native: 1 arcsec
+Source: https://www.clw.csiro.au/aclep/soilandlandscapegrid/ProductDetails.html
+License: Creative Commons Attribution 4.0 International (CC BY 4.0)
+Attribution: Commonwealth of Australia (Geoscience Australia)
+Layernames:
+
+'DEM_1s'
+Title: DEM SRTM 1 Second Hydro Enforced
+Description: The 1 second SRTM derived hydrologically enforced DEM (DEM-H Version 1.0) is a 1 arc second (~30 m) gridded digital elevation model (DEM) that has been hydrologically conditioned and drainage enforced. The DEM-H captures flow paths based on SRTM elevations and mapped stream lines, and supports delineation of catchments and related hydrological attributes.
+",248
+Data_Overview,Digital Earth Australia Geoscience Earth Observations,"Description: Digital Earth Australia's (DEA) Landsat Surface Reflectance products take Landsat 5 Thematic Mapper (TM), Landsat 7 Enhanced Thematic Mapper Plus (ETM+) and Landsat 8 Operational Land Imager (OLI) imagery captured over the Australian continent and corrects for inconsistencies across land and coastal fringes.. The result is accurate and standardised surface reflectance data, which is instrumental in identifying and quantifying environmental change..",97
+Data_Overview,GSKY Data Server for DEA Geoscience Earth Observations,"Description: Digital Earth Australia's (DEA) Landsat Surface Reflectance products take Landsat 5 Thematic Mapper (TM), Landsat 7 Enhanced Thematic Mapper Plus (ETM+) and Landsat 8 Operational Land Imager (OLI) imagery captured over the Australian continent and corrects for inconsistencies across land and coastal fringes.. This product has been corrected to remove the influences of the atmosphere, the time of year, terrain shadow and satellite view angles.. Some of the layers include image composites that are made from images acquired within a 16 day period.. Module name: getdata_dea_nci.py Resolution: variable (typically 1 arcsec) Updates: daily to yearly Source: https://opus.nci.org.au/display/Help/Datasets License: Creative Commons Attribution 4.0 International (CC BY 4.0) Attribution: The data products are produced using Digital Earth Australia.. The WCS service relies on GSKY - A Scalable, Distributed Geospatial Data Service from the National Centre for Environmental Information (NCI).. Layernames:  'blend_sentinel2_landsat_nbart_daily' : title: Multi-sensor (Landsat and Sentinel 2) surface reflectance (Beta) description: This multi-sensor service has been corrected to remove the influences of the atmosphere, the time of year, terrain shadow and satellite view angles using the methods described in Li et al.. 2012 https://doi.org/10.1016/j.rse.2012.06.018.. This service combines terrain corrected surface reflectance observations from three Landsat sensors (Landsat 5 TM, Landsat 7 ETM+, Landsat 8 OLI) and two Sentinel 2 sensors (Sentinel 2A and 2B).. More detailed information about the terrain corrected surface reflectance product suite produced using Digital Earth Australia including CCBY4.0 is available at http://dx.doi.org/10.4225/25/5a7a76d2e129e.. The service for each day is composed from all acquisitions that occurred over the Australian region on that calendar day.. 'hltc_high' : title: DEA High Tide Composite 25m v2.0 description: The High and Low Tide Composites product is composed of two surface reflectance composite mosaics of Landsat TM and ETM+ (Landsat 5 and Landsat 7 respectively) and OLI (Landsat 8) surface reflectance data Li et al.. 2010 https://doi.org/10.1109/JSTARS.2010.2042281..",547
+Data_Overview,Radiometric Data,"Description: This radiometric sub-collection of the Geoscience Australia Geophysics Reference Data Collection are compilations of radiometric data from an extensive archive of geophysical surveys dating back to 1947, which are contained in other sub-collections of this collection.. The individual survey datasets have been acquired by Geoscience Australia and its State and Territory Government partners.. The compilations of radiometric data involved the levelling and merging (mosaicking) of regularly interpolated grid (raster) data, from selected individual geophysical surveys, into near-seamless national scale grids for each datatype and creating derivations thereof.. The selected individual surveys are chosen based on the spatial resolution and accuracy of individual surveys within a given area.. Module name: getdata_radiometric.py Resolution: 100m (0.001 deg) Updates: None Source: https://opus.nci.org.au/display/Help/Datasets,  License: Creative Commons Attribution 4.0 International (CC BY 4.0) Attribution: Geoscience Australia.. The WCS service relies on GSKY - A Scalable, Distributed Geospatial Data Service from the National Centre for Environmental Information (NCI).. Layernames:  'radmap2019_grid_dose_terr_awags_rad_2019' title: Radiometric Grid of Australia (Radmap) v4 2019 unfiltered terrestrial dose rate description: The unfiltered terrestrial dose rate grid is a derivative of the 2019 radiometric or gamma-ray grid of Australia, which is a merge of over 600 individual gamma-ray spectrometric surveys.. The radiometric, or gamma-ray spectrometric method, measures the natural variations in the gamma-rays detected near the Earth's surface as the result of the natural radioactive decay of potassium (K), uranium (U) and thorium (Th).. The data are collected on airborne geophysical surveys conducted by Commonwealth, State and Northern Territory Governments and the private sector.The unfiltered terrestrial dose rate grid is derived as a linear combination of the unfiltered K, U and Th grids, and has a cell size of about 100m (0.001 degrees).. 'radmap2019_grid_dose_terr_filtered_awags_rad_2019' title: Radiometric Grid of Australia (Radmap) v4 2019 filtered terrestrial dose rate description: The filtered terrestrial dose rate grid is a derivative of the 2019 radiometric or gamma-ray grid of Australia, made of a combination of over 600 individual survey grids..",513
+Data_Overview,Landscape Data SLGA,"Description: The landscape attribute products available from the Soil and Landscape Grid of Australia (SLGA) were derived from DEM-S, the smoothed version of the national 1 second resolution Digital Elevation Model, which was derived from the 1 second resolution Shuttle Radar Topography Mission (SRTM) data acquired by NASA in February 2000.
+Module name: getdata_landscape.py
+Resolution: 3 arcsec
+Updates: None
+Source: https://www.clw.csiro.au/aclep/soilandlandscapegrid/ProductDetails.html""
+License: Creative Commons Attribution 4.0 International (CC BY 4.0)
+Attribution: CSIRO Australia, TERN (University of Queensland)
+Bounding Box: (112.99958, -44.00042, 153.99958, -10.0004)
+Layernames:
+
+'Prescott_index'
+key: '1'
+title: Prescott Index
+description: Prescott Index derived from 1 second DEM-S version 0.1
+'net_radiation_jan'
+key: '2'
+title: Net Radiation [January]
+description: None
+'net_radiation_july'
+key: '3'
+title: Net Radiation [July]
+description: None
+'total_shortwave_sloping_surf_jan'
+key: '4'
+title: Total Shortwave Sloping Surf [January]
+description: None
+'total_shortwave_sloping_surf_july'
+key: '5'
+title: Total Shortwave Sloping Surf [July]
+description: None
+'Slope'
+key: '6'
+title: Slope [percent]
+description: Percent slope (3” resolution) derived from 1 second DEM-S version 0.1
+'Slope_median_300m'
+key: '7'
+title: Slope [percent] Median 300m Radius
+description: Median of Percent slope at 300m radius (3” resolution) derived from 1 second DEM-S version 0.1
+'Slope_relief_class'
+key: '8'
+title: Slope Relief Class
+description: Slope relief (3” resolution) derived from 1 second DEM-S version 0.1
+'Aspect'
+key: '9'
+title: Aspect
+description: Aspect (3” resolution) derived from 1 second DEM-S version 0.1
+'Relief_1000m'
+key: '10'
+title: Relief [1000m radius]
+description: 1000 m elevation range (3” resolution) derived from 1 second DEM-S version 0.1
+'Relief_300m'
+key: '11'
+title: Relief [300m radius]
+description: 300 m elevation range (3” resolution) derived from 1 second DEM-S version 0.1
+'Topographic_wetness_index'
+key: '12'
+title: Topographic Wetness Index
+description: Topographic Wetness Index (3” resolution) derived from 1 second DEM-H version 1.0
+'TPI_mask'
+key: '13'
+title: TPI Mask
+description: None
+'SRTM_TopographicPositionIndex'
+key: '14'
+title: SRTM_TopographicPositionIndex
+description: Topographic position index (3” resolution) derived from 1 second DEM-S version 0.1
+'Contributing_area'
+key: '15'
+title: Contributing Area [partial]
+description: Contributing Area - Multiple Flow Direction (Partial), 3” resolution, derived from 1 second DEM-H version 1.0
+'MrVBF'
+key: '16'
+title: MrVBF
+description: Multi-resolution Valley Bottom Flatness (MrVBF) at 3 second resolution derived from 1 second DEM-S version 1.0
+'Plan_curvature'
+key: '17'
+title: Plan Curvature
+description: Plan curvature (3” resolution) derived from 1 second DEM-S version 0.1
+'Profile_curvature'
+key: '18'
+title: Profile Curvature
+description: Profile curvature (3”resolution) derived from 1 second DEM-S version 0.1
+",860
+temporal,Module geodata_harvester.temporal,"Utility functions for for temporal processing.
+--Function List, in order of appearence--
+combine_rasters_temporal: Concatenates files by time returns xarray.
+aggregate_temporal: Aggregates xarrays by specified function and time period.",51
+temporal,Functions,"aggregate_temporal(xdr, period='yearly', agg=['mean'], outfile='temporal_agg', buffer=None)
+:   Make a data aggregation (mean, median, sum, etc) through time on an xarray.
+    Expects xarray coordinates to be x, y, time. Saves every aggregation for
+    every time period as its own tif file.
+Example:
+file_list = ['../data/mvp_daily_rain_silo/daily_rain_2017_cropped.tif',
+     '../data/mvp_daily_rain_silo/daily_rain_2018_cropped.tif']
+
+xdr = combine_rasters_temporal(file_list, channel_name='band',attribute_name='long_name')
+
+outfname_list, agg_list = aggregate_temporal(
+    xdr,period=100,agg=['mean','sum'],outfile='temporal_agg')
+
+Parameters
+----------
+xdr : xarray object of x,y,time
+period : string or int. Time period to perform aggregation,
+    'yearly', 'monthly', or number of periods to aggregate over.
+agg: list of strings. Choice of aggregation methods to apply of
+    ['mean','median','sum','perc95','perc5']
+outfile : string. Prefix of output file name.
+buffer: integer time period in same units as period to buffer into the future.
+
+Returns
+-------
+outfname_list : list of strings of output file names
+agg_list : list of strings of aggregation methods
+
+combine_rasters_temporal(file_list, channel_name='band', attribute_name='long_name')
+:   Combines multiple tif files into single xarray object. Assumes files are in
+    temporal order, and additional channels contain sequential time step data.
+    Also assumes files are of the same shape (x,y,t).
+Example:
+file_list = ['../data/mvp_daily_rain_silo/daily_rain_2017_cropped.tif',
+         '../data/mvp_daily_rain_silo/daily_rain_2018_cropped.tif']
+
+xdr = combine_rasters_temporal(file_list, channel_name='band',attribute_name='long_name')
+
+Parameters
+----------
+file_list : list of filename strings in date order to concatenate.
+    Expected to be of the form ""x,y"" or ""x,y,z1""
+channel_name : string of coordinate dimension to concatentate (band, time,
+    etc). Check options with rioxarray.open_rasterio('filename').coords
+attribute_name : string name of rioxarray attribute holding a time/date
+    label. Check with rioxarray.open_rasterio('filename').attrs
+
+Returns
+-------
+xdr : xarray object of x,y,time, with approriate metadata.
+
+group_by_custom_periods(xdr, periods: int, agg_range: int)
+:   NOTE: NOT ALL IMPLEMENTED!!! Specifcally multiband data. But I don't think
+    we want to deal with that, as it is already accounted for previously? Maybe.
+Aggregates over multiple files but keeps channels independently.
+Results are written to new tif files.
+
+This function should
+
+dates of the from ""yyyy-mm-dd""
+rolling mean
+
+Unit of measurment you are working in seconds, daily, monthly, yearly (or integers)
+Time steps of channels (e.g. 12xmonthly)
+time steps of files (each file represents X length of time)
+time steps of aggregation (e.g. average monthly)
+time steps of
+
+
+
+Aggregrates over multiple files and over all channels
+and writes results to new tif file(s).
+
+Step 1: combine files (assumes consistent times and start finish points)
+Step 2: roll data into outtime chunks
+Step 3: perform aggregation on chunks
+
+e.g. aggregate daily rainfall data for each month (for the duration of the files.)
+e.g. aggregate monthly temperature data over a year (for the duration of the files.)
+
+e.g. aggregate common months over multiple years, average rainfall in July from 2015 to 2020
+
+
+Takes a stream of temporal data in a particular time increment and converts
+to a new time-increment by averaging.
+
+temporal_crop(xdr, start_time, end_time)
+:   Cuts an xarray object by start and end times.
+Parameters
+----------
+xdr : xarray object of x,y,time
+start_time : string time in 'yyyy-mm-dd' format.
+end_time : string time in 'yyyy-mm-dd' format.
+
+Returns
+-------
+xdr_crop : xarray object of x,y,time, with approriate metadata.
+",937
+getdata_dea,Module geodata_harvester.getdata_dea,"Script to download satellite data from Digital Earth Australia (DEA)for a given time,
+resolution, and bounding box. Final data is saved as geotiff or NetCDF.
+Satellite data sources are calibrated by DEA for Australia and include datasets for Landsat and Sentinel2.
+An overview of DEA data is available here
+https://docs.dea.ga.gov.au/notebooks/DEA_datasets/README.html
+and explanation of datasets here:
+https://docs.dea.ga.gov.au/notebooks/Beginners_guide/02_DEA.html
+A full ist of data layer names can be retrieved with get_deadict() or get_capabilities() for a given url
+The DEA WCS service capabilities are also available online at:
+https://docs.dea.ga.gov.au/setup/gis/web_services.html#Web-Coverage-Service-(WCS)
+For more complex data processing use DEA's excellent Jupyter notebooks within their Sandbox (authentication needed)
+that leverage the Open Data Cube software package (datacube-core)
+https://docs.dea.ga.gov.au/setup/Sandbox/sandbox.html
+Other resources:
+- NCI (authentication needed)
+https://docs.dea.ga.gov.au/setup/NCI/README.html
+
+SpatioTemporal Asset Catalog (STAC) endpoint  (authentication needed):
+https://docs.dea.ga.gov.au/notebooks/Frequently_used_code/Downloading_data_with_STAC.html
+
+LIMITATIONS: for large bbox the server can exceeds limits and the data is not returned.
+This package is part of the Data Harvester project developed for the Agricultural Research Federation (AgReFed).
+Copyright 2022 Sydney Informatics Hub (SIH), The University of Sydney
+This open-source software is released under the LGPL-3.0 License.
+Author: Sebastian Haan
+TBF:
+- apply cloud mask to downloaded images automatically (accept ""valid"", ""water"", ""snow"")
+- include some DEA tools https://github.com/GeoscienceAustralia/dea-notebooks/blob/stable/Tools/dea_tools/",413
+getdata_dea,Functions,"get_capabilities(url)
+:   Get capabilities from WCS layer.
+Parameters
+----------
+url : str
+    layer url
+
+Returns
+-------
+keys    : list
+    layer identifiers
+titles  : list  of str
+    layer titles
+descriptions : list of str
+    layer descriptions
+bboxs   : list of floats
+    layer bounding boxes
+
+get_dea_images(layername, year, bbox, resolution, outpath, crs='EPSG:4326', format_out='GeoTIFF', verbose=False)
+:   Get all satellite images from DEA for a given layer and year.
+    Downloaded images are saved either as GeoTIFF or NetCDF.
+Parameters
+----------
+layername : str
+    layer identifier
+year : str
+    selected year for images
+bbox : list
+    layer bounding box
+resolution : int
+    layer resolution in arcsec
+outpath : str
+    output directory
+crs: str
+    crs, default 'EPSG:4326'
+format: str
+    output format, either ""GeoTIFF"" or ""NetCDF""
+
+Return
+------
+Exited ok: boolean
+
+get_dea_images_daterange(layername, date_min, date_max, bbox, resolution, outpath, crs='EPSG:4326', format_out='GeoTIFF', verbose=False)
+:   Get all satellite images from DEA for a given layer and year.
+    Downloaded images are saved either as GeoTIFF or NetCDF.
+Parameters
+----------
+layername : str
+    layer identifier
+date_min : str
+    start datetime string for images (format: YYYY-MM-DD)
+date_max : str
+    end datetime string for images (format: YYYY-MM-DD)
+bbox : list
+    layer bounding box
+resolution : int
+    layer resolution in arcsec
+outpath : str
+    output directory
+crs: str
+    crs, default 'EPSG:4326'
+format: str
+    output format, either ""GeoTIFF"" or ""NetCDF""
+
+Return
+------
+Exited ok: boolean
+
+get_dea_layers(layernames, years, bbox, resolution, outpath, crs='EPSG:4326', format_out='GeoTIFF', verbose=False)
+:   Get all images for all layers and all years.
+    Downloaded images are saved in outpath.
+Parameters
+----------
+layernames : list of strings
+    layer identifiers
+years : list
+    years, e.g. [2019, 2020]
+bbox : list
+    layer bounding box
+resolution : int
+    layer resolution in arcsec
+outpath : str
+    output directory
+crs: str
+    crs, default 'EPSG:4326'
+format: str
+    output format, either ""GeoTIFF"" or ""NetCDF""
+
+Return
+------
+list of output filenames for each layer
+
+get_dea_layers_daterange(layernames, date_start, date_end, bbox, resolution, outpath, crs='EPSG:4326', format_out='GeoTIFF', verbose=False)
+:   Get all images for all layers and all dates between start_date and end_date.
+    Downloaded images are saved in outpath.
+Parameters
+----------
+layernames : list of strings
+    layer identifiers
+date_start : str
+    start date in dateformat YYYY-MM-DD
+date_end : str
+    end date in dateformat YYYY-MM-DD
+bbox : list
+    layer bounding box
+resolution : int
+    layer resolution in arcsec
+outpath : str
+    output directory
+crs: str
+    crs, default 'EPSG:4326'
+format: str
+    output format, either ""GeoTIFF"" or ""NetCDF""
+
+Return
+------
+list of output filenames for each layer
+
+get_deadict()
+:   Returns dictionary of keys and layer titles
+To update manually please run get_capabilities() to retrieve all current layer details
+
+get_times(url, layername, year=None)
+:   Return available dates for layer.
+Parameters
+----------
+url: str, layer url
+layername: str, name of layer id
+year: int or str, year of interest (if None, times for all available years are returned)
+
+Return
+------
+list of dates
+
+get_times_startend(url, layername, dt_start, dt_end)
+:   Return all available images datetimes for layer in range
+    between start and end date.
+Parameters
+----------
+url: str, layer url
+layername: str, name of layer id
+dt_start: str, start date in dateformat YYYY-MM-DD
+dt_end: str, end date in dateformat YYYY-MM-DD
+
+Return
+------
+list of dates
+
+get_wcsmap(outfname, layername, bbox, date, resolution, url, crs='EPSG:4326', format_out='GeoTIFF')
+:   Download and save geotiff from WCS layer.
+Parameters
+----------
+outfname : str
+    output file name
+layername : str
+    layer identifier
+bbox : list
+    layer bounding box
+date : str
+    datetime
+resolution : int
+    layer resolution in arcsec
+url : str
+    url of wcs server
+crs: str
+    crsm default 'EPSG:4326'
+format: str
+    output format, either ""GeoTIFF"" or ""NetCDF""
+
+Return
+------
+Exited ok: boolean
+
+getdict_cloudmask()
+:   return dict of cloud mask
+getdict_license()
+:   Retrieves the DEA data license and NCI attribution information as dict
+plot_raster(infname)
+:   Read in raster tif with rasterio and visualise as map.
+Parameters
+----------
+infname : str
+
+test_get_capabilities()
+:   Test script to retrieve WCS capabilities
+test_get_dea_images()
+:   Test script to retrieve and save images for a given year
+test_get_dea_images_daterange()
+:   Test script to retrieve and save images for a given year
+test_get_times()
+:   Test script to retrieve available times for a layer
+test_get_times_startend()
+:   Test script to retrieve available times for a layer
+test_get_wcsmap()
+:   Test script to retrieve and save image for one layer and date
+write_deadict()
+:   Generates new DEA dictionary from crawling WCS url",1309
+spatial,Module geodata_harvester.spatial,"Utility functions for for spatial processing.
+--Function List, in order of appearence--
+_points_in_circle(internal): Return all points whose indices are within a given
+    circle.
+_coreg_buffer(internal): Queries values of a raster around a point buffer
+    region.
+raster_buffer: Given a longitude,latitude point, a raster file, and a buffer
+    region, find the values of all points in circular buffer.
+_get_features(internal): Parse features from GeoDataFrame format to Rasterio
+    format
+_coreg_polygon(internal): Crops a raster to a polygon shape.
+raster_polygon_buffer: Given list of longitudes and latitudes defining a
+    polygon, crop raster file, return the values of all points in the polygon.",152
+spatial,Functions,"raster_buffer(long, lat, raster, buffer)
+:   given a longitude,latitude point, a raster file, and a buffer region,
+        return the value values of all points in circular buffer.
+INPUTS:
+long: longitude point of interest
+lat: latitude point of interest
+raster: file path/name (as string)
+buffer: integer, raster array pixel units to return values for
+
+RETURNS
+values: list of raster array values around point of interest.
+
+raster_polygon_buffer(lngs, lats, raster)
+:   Given a list of longitudes and latitudes that define a polygone, crop a
+        raster file, and return the values of all points in the polygon.
+INPUTS:
+lngs: list of longitudes
+lats: list of latitudes
+raster: file path/name (as string) of raster
+
+RETURNS
+values: list of raster array values inside polygon.
+",191
+harvesterwidgets,Module geodata_harvester.widgets.harvesterwidgets,"This script generates interactive notebook widgets for selecting the settings.
+Widgets are defined using the package ipywidgets, for more details see:
+https://ipywidgets.readthedocs.io/en/stable/index.html
+and examples:
+https://coderzcolumn.com/tutorials/python/interactive-widgets-in-jupyter-notebook-using-ipywidgets
+This package is part of the Data Harvester project developed for the Agricultural Research Federation (AgReFed).
+Copyright 2023 Sydney Informatics Hub (SIH), The University of Sydney
+This open-source software is released under the LGPL-3.0 License.",121
+harvesterwidgets,Functions,"eval_widgets(w_settings, names)
+:   This function is converting widget settings into dictionary.
+If widget settings change, add settings here too.
+
+Input:
+    w_settings: list of settings
+    names: list of setting names
+
+Output:
+    dict_settings: dictionary of settings
+
+gen_accordion(panels, panel_titles)
+:   Generate accordion of panels
+Input:
+    panels: list of panels
+    panel_titles: list of panel titles
+
+Output:
+    accordion_main: accordion of panels
+
+gen_loadwidget()
+:   Generate widget for loading settings from yaml file
+Input:
+    None
+
+Output:
+    w_load: widget for loading settings
+
+gen_maintab()
+:   Generate New Settings Tab
+Input:
+    None
+
+Output:
+    tab_nest: tab containing New Settings and Load Settings
+    w_settings: widget for settings
+    names_settings: list of names of settings
+    w_load: widget for loading settings
+
+gen_panel_dea()
+:   Generate panel for DEA settings
+Input:
+    None
+
+Output:
+    panel_dea: panel for DEA settings
+    w_dea: widget for DEA settings
+    options_dea: list of DEA options
+
+gen_panel_dem()
+:   Generate panel for DEM settings
+Input:
+    None
+
+Output:
+    panel_dem: panel for DEM settings
+    w_dem: widget for DEM settings
+    options_dem: list of DEM options
+
+gen_panel_ee()
+:   Generate panel for Google Earth Engine settings
+Input:
+    None
+
+Output:
+    panel_ee: panel for Google Earth Engine settings
+    w_ee: widget for Google Earth Engine settings
+    names_ee: list of widget names
+
+gen_panel_io()
+:   Generate panel for input and output settings
+Input:
+    None
+
+Output:
+    panel_io: panel for input and output settings
+    w_io: widget for input path
+    w_names: list of names of widgets
+
+gen_panel_landscape()
+:   Generate panel for landscape settings
+Input:
+    None
+
+Output:
+    panel_ls: panel for landscape settings
+    w_ls: widget for landscape settings
+    options_ls: list of landscape options
+
+gen_panel_radiometric()
+:   Generate panel for radiometric settings
+Input:
+    None
+
+Output:
+    panel_rm: panel for radiometric settings
+    w_rm: widget for radiometric settings
+    options_rm: list of radiometric options
+
+gen_panel_silo()
+:   Generate panel for SILO settings
+Input:
+    None
+
+Output:
+    panel_silo: panel for SILO settings
+    w_silo: widget for SILO settings
+    options_silo: list of SILO options
+
+gen_panel_slga()
+:   Generate panel for SLGA settings
+Input:
+    None
+
+Output:
+    panel_slga: panel for SLGA settings
+    w_slga: widget for SLGA settings
+    options_slga: list of available SLGA layers
+
+gen_panel_st()
+:   Generate panel for spatial-temporal settings
+Input:
+    None
+
+Output:
+    panel_st: panel for spatial-temporal settings
+    settings_st: list of settings
+    settings_names: list of names of settings
+
+gen_panels()
+:   Generate all settings panels
+Input:
+    None
+
+Output:
+    panels: list of panels
+    w_settings: list of widgets for all settings
+    names_settings: list of widget names
+    panel_titles: list of panel titles
+
+gen_savebutton()
+:   Generate Save button
+Input:
+    None
+
+Output:
+    w_savebutton: widget for saving settings
+
+load_settings(fname_settings)
+:   Load settings from yaml file
+Input:
+    fname_settings: path and filename to settings file
+
+Output:
+    settings: settings as namespace
+
+print_settings(settings)
+:   print settings
+Input:
+    settings: settings object
+
+Output: 
+    None
+
+save_dict_settings(dict_settings, yaml_outfname)
+:   save dictionary to yaml file
+Input:
+    dict_settings: dictionary of settings
+    yaml_outfname: path and filename to save settings
+
+Output:
+    None
+
+savebutton_onclick(params)
+:   Save settings to yaml file
+Input:
+    params: list of widgets, list of names of widgets, output filename
+
+Output:
+    None
+",874
+Earth_Engine_Data_Overview,Earth Engine Data Overview,Version 0.1.0 | 5 Aug 2022,20
+Earth_Engine_Data_Overview,Introduction,"Through the Google Earth Engine
+API (https://earthengine.google.com/), the AgReFed Data-Harvester provides access
+to the following satellite products:
+
+USGS Landsat 9 Level 2, Collection 2, Tier 1 (https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC09_C02_T1_L2?hl=en)
+USGS Landsat 8 Level 2, Collection 2, Tier 1 (https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C02_T1_L2)
+USGS Landsat 7 Level 2, Collection 2, Tier 1 (https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LE07_C02_T1_L2)
+USGS Landsat 5 Level 2, Collection 2, Tier 1 (https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LT05_C02_T1_L2)
+Sentinel-2 MSI: MultiSpectral Instrument, Level-2A (https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR?hl=en)
+
+Note that Earth Engine is still under active development. Download and
+access limits apply, including a maximum download size of 32 MB
+(but, ~50MB raw).
+The Data Harvester uses the geedim (https://github.com/dugalh/geedim) package
+to overcome this ceiling but cloud processing limits (e.g. during compositing of
+images) will continue to limit the amount of data that can be downloaded.",338
+Earth_Engine_Data_Overview,Landsat,"The USGS/NASA Landsat Program provides satellite spectral and thermal data of
+the Earth from 1972. Collection 2, Tier
+1 (https://www.usgs.gov/landsat-missions/landsat-collection-2-level-1-data)
+products in the catalog represent data of the highest available quality with
+inclusions of corrections for improved geometric accuracy, digital elevation
+modeling and radiometric calibrations. Strips of collected data are packaged
+into overlapping ""scenes"" covering approximately 170 km x 183 km using a
+standardized reference
+grid (https://landsat.gsfc.nasa.gov/about/the-worldwide-reference-system/).
+Coverage: See coverage here (https://sentinel.esa.int/web/sentinel/user-guides/sentinel-2-msi/revisit-coverage)
+Resolution: 15/30/100 m (https://www.usgs.gov/faqs/what-are-band-designations-landsat-satellites)
+Period (y-m-d):
+
+Landsat 9  : 2021-10-31 – present
+Landsat 8  : 2013-03-18 – present
+Landsat 7  : 1999-05-28 – 2022-04-06
+Landsat 5  : 1984-03-16 – 2012-05-05 
+
+Updates: Daily
+Revisit frequency: 16 days
+Attribution: tbd",307
+Earth_Engine_Data_Overview,"Sentinel-2, Level 2A","Sentinel-2 is part of a constellation of satellites in the Copernicus
+Program (https://www.copernicus.eu/en) and surface reflectance images have been
+available from 2017. Level 2A
+images (https://docs.sentinel-hub.com/api/latest/data/sentinel-2-l2a/) provide
+orthorectified and atmospherically corrected surface reflectance data. Each
+Level 2A product is composed of 100 km^2^ tiles in cartographic geometry
+(UTM/WGS84 projection).
+Coverage: See coverage here (https://sentinel.esa.int/web/sentinel/user-guides/sentinel-2-msi/revisit-coverage)
+Resolution: 10/20/60 m (https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-2/instrument-payload/resolution-and-swath)
+Period (y-m-d): 2017-03-28 – present
+Updates: Daily
+Revisit frequency: 5 days
+Attribution: tbd",228
+Earth_Engine_Data_Overview,Functionality,"The following functionality are supported:
+
+Selecting image(s) based on date(s)
+Automatic cloud masking, shadow masking, using eemont and geedim
+Automatic scale and offsetting, using eemont 
+Image compositioning/reduction
+Automatic calculation of spectral indices (via Awesome Spectral
+  Indices (https://github.com/awesome-spectral-indices/awesome-spectral-indices))
+Interactive map previews, with automatic pixel stretching, using geemap and geetools
+Download image(s) using split-download-assemble method to overcome size
+  limits, using geedim 
+",125
+example_harvest,GEODATA-HARVESTER NOTEBOOK,"The Geodata-Harvester enables researchers with reusable workflows for automatic data extraction from a range of data sources including spatial-temporal processing into useable formats. User provided data is auto-completed with a suitable set of spatial- and temporal-aligned covariates as a ready-made dataset for machine learning and agriculture models. In addition, all requested data layer maps are automatically extracted and aligned for a specific region and time period.
+The main workflow of the Harvester is as follows:
+Options and user settings (e.g., data layer selections, spatial coverage, temporal constraints, i/o directory names) are defined by the user in the notebook settings menu or can be loaded with a settings yaml file (e.g., settings/settings_test). All settings are also saved in a yaml file for reusability.
+The notebook imports settings and all Python modules that include functionality to download and extract data for each data source. After settings are read in, checked, and processed into valid data retrieval (API) queries, all selected data layers are sequentially downloaded and then processed into a clean dataframe table and co-registered raster maps. The entire workflow can be run either completely automatically or individually by selecting only certain process parts in the Notebook.
+Additional data sources can be best added by writing the API handlers and extraction functionalities as separate Python module, which are then imported by the Notebook. Currently the following data sources are supported by the following modules:
+
+'getdata_slga.py': Soil Data from Soil and Landscape Grid of Australia (SLGA)
+'getdata_landscape': Landscape data from Soil and Landscape Grid of Australia (SLGA)
+'getdata_silo.py': Climate Data from SILO
+'getdata_dem.py: 'National Digital Elevation Model (DEM) 1 Second plus Slope and Apect calculation
+'getdata_dea_nci.py: 'Digital Earth Australia's (DEA) Geoscience Earth Observations via NCI server
+'getdata_dea.py: 'Digital Earth Australia's (DEA) Geoscience Earth Observations via Open Web Service server provided by DEA
+'getdata_radiometric.py': Geoscience Australia National Geophysical Compilation Sub-collection Radiometrics
+'eeharvest': Google Earth Engine API integration handler
+For more details. please see README and the Data Overview page.
+
+This notebook is part of the Data Harvester project developed for the Agricultural Research Federation (AgReFed).
+Copyright 2023 Sydney Informatics Hub (SIH), The University of Sydney
+Import libraries
+```python
+import os",515
+example_harvest,Import harvest function from geodata_harvester,"from geodata_harvester import harvest
+```
+Specify settings file
+Set settings in settings YAML file beforehand, such as data-layer names, region, and dates. 
+```python",41
+example_harvest,Filename,"fname_settings = 'settings_harvest.yaml' infname = os.path.join(path_settings,fname_settings) ``` Harvest The harvest function executes automatically all download and processing steps for all data layers from the web as specified in settings file above..",52
+example_harvest,or only the first rows with,"df.head()
+```
+
+
+
+
+
+
+Longitude
+Latitude
+geometry
+ee_LANDSAT_c609f132_median
+landsat_barest_earth
+DEM
+landscape_Slope
+landscape_Aspect
+radmap2019_grid_dose_terr_awags_rad_2019
+radmap2019_grid_dose_terr_filtered_awags_rad_2019
+max_temp_median
+min_temp_median
+monthly_rain_sum
+Bulk_Density_0-5cm
+Clay_0-5cm
+
+
+
+
+0
+149.852680
+-30.264663
+POINT (149.85268 -30.26466)
+0.294885
+1059
+244.658585
+1.046624
+209.138062
+33.151680
+32.962944
+22.700001
+9.8
+189.500000
+1.368779
+27.214527
+
+
+1
+149.884838
+-30.265302
+POINT (149.88484 -30.26530)
+0.123566
+1082
+264.428772
+1.001000
+279.542847
+35.969486
+35.945480
+22.600000
+9.5
+189.000000
+1.362662
+31.956041
+
+
+2
+149.884838
+-30.265302
+POINT (149.88484 -30.26530)
+0.123566
+1082
+264.428772
+1.001000
+279.542847
+35.969486
+35.945480
+22.600000
+9.5
+189.000000
+1.362662
+31.956041
+
+
+3
+149.838791
+-30.278542
+POINT (149.83879 -30.27854)
+0.318282
+1092
+233.005081
+0.841430
+242.743683
+29.618393
+29.478428
+22.900000
+10.1
+173.199951
+1.360451
+32.675858
+
+
+4
+149.830843
+-30.275437
+POINT (149.83084 -30.27544)
+0.293676
+1160
+230.575439
+1.062537
+242.921112
+25.061012
+24.757614
+22.900000
+10.1
+173.199951
+1.334362
+35.097813
+
+
+
+
+```python
+```",519
