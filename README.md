@@ -2,7 +2,7 @@
 
 This is a demo app that uses OpenAI's GPT-3 to answer questions using context specific documents. 
 
-For the webapp demonstration, please see [here](https://sydney-informatics-hub.github.io/geodata-harvester/_includes/embed_chat.html)
+For the webapp demonstration, please see [here](https://sydney-informatics-hub.github.io/geodata-harvester/_includes/embed_chat.html). The context for this chatbot is derived from the [Geodata-Harvester documentation](https://sydney-informatics-hub.github.io/geodata-harvester/) and is embedded in the same page.
 
 
 ## How to use
@@ -26,7 +26,7 @@ The app uses the following main steps to answer a question:
 2. Construct a prompt for the question using the most relevant document sections.
 3. Use the prompt to answer the question using OpenAI's GPT-3.
 
-The number of tokens used to answer the question is estimated by counting the number of tokens used for the question, the prompt and the response.
+The number of tokens used to answer the question is estimated by counting the number of tokens used for the question embedding, the prompt and the response.
 
 ## Requirements
 
@@ -55,6 +55,6 @@ The app has been tested with Python 3.9 and 3.10.
 
 ## License
 
-This open-source project is licensed under the Lesser General Public License (LGPL) v3.0. See the [LICENSE](LICENSE) file for details.
+This open-source project is licensed under the GNU LESSER GENERAL PUBLIC LICENSE v2.1. See the [LICENSE](LICENSE) file for details.
 
 @Copyright 2023 Sebastian Haan
