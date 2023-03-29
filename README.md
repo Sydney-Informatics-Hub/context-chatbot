@@ -4,7 +4,10 @@ This is a demo app that uses OpenAI's GPT-3 to answer questions using context sp
 
 The context for this chatbot is derived from the [Geodata-Harvester documentation](https://sydney-informatics-hub.github.io/geodata-harvester/) and the webapp is embedded in the same page (see Section "What is it").
 
-<center><img title="Webapp preview" alt="Webapp preview image" src="docs/images/preview_webapp.png" width="500" /></center>
+<center>
+<img src="https://github.com/Sydney-Informatics-Hub/context-chatbot/blob/main/docs/images/preview_webbapp.png" title="Webapp preview" alt="Webapp preview image"  width="600"/>
+</center>
+
 
 
 ## How to use
