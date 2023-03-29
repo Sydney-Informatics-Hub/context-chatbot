@@ -9,7 +9,8 @@ The context for this chatbot is derived from the [Geodata-Harvester documentatio
     style="display: block; 
            margin-left: auto;
            margin-right: auto;
-           width: 65%;"
+           width: 65%;
+           text-align: center;"
            src="https://github.com/Sydney-Informatics-Hub/context-chatbot/blob/main/docs/images/preview_webbapp.png" title="Webapp preview" alt="Webapp preview image">
 </img>
 
