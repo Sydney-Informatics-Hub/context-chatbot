@@ -46,8 +46,8 @@ separator_len = len(encoding.encode(SEPARATOR))
 COMPLETIONS_MODEL = "text-davinci-003"
 EMBEDDING_MODEL = "text-embedding-ada-002"
 
-MAX_SECTION_LEN = 800
-MAX_COMPLETION_TOKENS = 800
+MAX_SECTION_LEN = 1000
+MAX_COMPLETION_TOKENS = 1000
 
 FNAME_EMBEDDINGS = "embeddings/dfembeddings.csv"
 FNAME_SECTIONS = "embeddings/sections.csv"
@@ -187,10 +187,12 @@ def construct_prompt(
     
 
     # Construct the prompt header and include any rules for the answer:
-    header = """Answer the question as truthfully as possible using the provided context below. 
-    If the answer seems to be a list, provide answer in form of bullet points.
+    header = """You are an intelligent assistant helping users of the Geodata-Harvester with their questions. \n
+    Answer the question as truthfully as possible using the provided context below. \n
+    If the answer seems to be a list, provide answer in form of bullet point. \n
+    If there are relevant links included in Context text below, add them as "Further References" bullet points at the end of the answer. \n
     If the answer is not contained within the text below, say 
-    "Hmm, it seems this information is not available for the Geodata-Harvester."
+    "Hmm, this information seems to be not available for the Geodata-Harvester." \n
     ###
     \n\n Context:\n
     ###
@@ -310,6 +312,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
